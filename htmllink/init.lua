@@ -1,3 +1,4 @@
+
 led_wifi      = 2
 key           = 1
 led           = 6
@@ -5,6 +6,7 @@ key_led_state = 2--2: not press;1:press on;0:press off;3:http send
 
 
 i       = 0 
+j       = 0
 disconn = 0 
 click2  = 0
 
@@ -12,14 +14,29 @@ gpio.mode(led_wifi, gpio.OUTPUT)
 gpio.mode(led, gpio.OUTPUT)
 gpio.mode(key, gpio.INPUT)
 
+dofile("routerset.lua")
 
 
 
 
-
+ 
+if(file.open("info.lua", "r")==nil) then
+    file.close()  
+    file.open("info.lua", "w+")
+    file.writeline("configed = '0'")
+    file.writeline("ssid     = '".."1234567890".."'")
+    file.writeline("password = '".."1234567890".."'")
+    file.close()  
+end    
+ 
+ 
 if(gpio.read(key)==0) then
-    print("reset key pressed ")
-    file.remove("info.lua")
+    print("reset key pressed ");
+    file.open("info.lua", "w+")
+    file.writeline("configed = '0'")
+    file.writeline("ssid     = '".."1234567890".."'")
+    file.writeline("password = '".."1234567890".."'")
+    file.close()  
 end
 
 
@@ -44,21 +61,59 @@ gpio.trig(key, "up",pin1cb)
 
 
 
-if(file.open("info.lua", "r") == nil) then
-    configed = "0"
-else
-    file.close()
-    dofile("info.lua");
-    
-    if(configed == "-1") then
-        file.remove("info.lua")
-        configed = "0" 
-    else
-    configed = "1"
-    wifi.setmode(wifi.STATION)
-    end
+function to_view_state()
+    tmr.alarm(1, 500, 1, function() 
+        click2 = 0
+        -- print(wifi.sta.status())
+        if (wifi.sta.getip() ~= nil) then
+            print("Config done, IP is "..wifi.sta.getip())
+            pwm.close(led_wifi);
+            gpio.write(led_wifi, gpio.LOW);  
+
+            file.open("info.lua", "w+")
+            file.writeline("configed = '1'")
+            file.writeline("ssid     = '"..ssid.."'")
+            file.writeline("password = '"..password.."'")
+            file.close()  
+            tmr.stop(1)
+
+            tmr.alarm(1, 500, 1, function() 
+                click2 = 0
+                i = i+1;
+                if(i == 3)    then 
+                    i = 0;
+                    j = j+1;
+                    print(j);
+                    
+                    if(j >= 10) then
+                        print("10 time disconnect from server,system attempt to reconnect")
+                        conn:close()
+                    end
+                    if(j >= 50) then
+                        print("10 time disconnect from server,system attempt to restart")
+                        node.restart()
+                    end
+                    
+                     
+                    if (disconn == 0) then 
+                        toconn()
+                        print("disconn==0")
+                        
+                    else
+                        toget()
+                         print("disconn==1")   
+                    end
+                end
+            end)
+        end
+    end)
 end
 
+
+
+print("Starting...")
+wifi.setmode(wifi.STATION)
+dofile("info.lua");
 
 --configed = "0";
 print(configed)
@@ -66,54 +121,35 @@ if(configed == "0") then
     print("html")
     pwm.setup(led_wifi, 6, 512);
     pwm.start(led_wifi); 
-    dofile("routerset.lua")   
+    start_html_link();   
+    to_view_state()
 else
     print("manual");
     pwm.setup(led_wifi, 2, 512);
     pwm.start(led_wifi); 
     wifi.sta.config(ssid,password)  
+    to_view_state()
 end
 
 
-tmr.alarm(1, 500, 1, function() 
-click2 = 0
-if (wifi.sta.getip() ~= nil) then
-    print("Config done, IP is "..wifi.sta.getip())
-    pwm.close(led_wifi);
-    gpio.write(led_wifi, gpio.LOW);  
-    tmr.stop(1)
 
 
-    tmr.alarm(1, 500, 1, function() 
-        click2 = 0
-        i = i+1;
-        if(i == 3)    then 
-            i = 0;
-            if (disconn == 0) then 
-                toconn()
-                 print("disconn==0")
-                
-            else
-                toget()
-                 print("disconn==1")
-               
-            end
-        end
-    end)
-end
-end)
+
+
 
 
 
 function toconn()
-    
-       conn = net.createConnection(net.TCP, false) 
+    conn = net.createConnection(net.TCP, false) 
     
     --conn:on("receive", function(conn, pl) print(string.match(pl,"%b{}"))
-    conn:on("receive", function(conn, pl) print(string.match(pl,"%b{}"))
+    conn:on("receive", function(conn, pl) 
         local data  = string.match(pl,"%b{}")
         if(data ~= nil) then   
+            print(string.match(pl,"%b{}"))
             local value = string.sub(data,2,2)
+            
+            j = 0;
             
             if (key_led_state == 3) then
                 key_led_state = 2
@@ -155,11 +191,9 @@ function toget()
     .."Connection: keep-alive\r\n"
     .."Cache-Control: no-cache\r\n\r\n")
     key_led_state = 3; 
-    -- i = i+1
-    -- print(i)
+   -- i             = i+1
+   -- print(i)
 end
-
-
 
 
 
