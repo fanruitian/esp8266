@@ -16,7 +16,7 @@ gpio.mode(key, gpio.INPUT)
 
 
 function to_view_state()
-    tmr.alarm(1, 500, 1, function() 
+    tmr.alarm(1, 1000, 1, function() 
         click2 = 0
         -- print(wifi.sta.status())
         if (wifi.sta.getip() ~= nil) then
@@ -113,16 +113,17 @@ dofile("info.lua");
 print(configed)
 if(configed == "0") then
     print("smart")
-    pwm.setup(led_wifi, 6, 512);
-    pwm.start(led_wifi); 
+    -- pwm.setup(led_wifi, 6, 512);
+    -- pwm.start(led_wifi); 
     wifi.startsmart(0, 
     function(my_ssid, my_password) 
         print(string.format("Success. SSID:%s ; PASSWORD:%s", my_ssid, my_password))
      
-            pwm.setclock(led_wifi, 2)  
+        --pwm.setclock(led_wifi, 2)  
             ssid     = my_ssid
             password = my_password
             to_view_state()
+            print("asda")
         end
     ) 
 else
