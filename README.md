@@ -13,3 +13,8 @@ esp8266(nodemcu)'s lua file,software
 
    https://github.com/nodemcu/nodemcu-studio-csharp
 
+###GPIO
+led_wifi      = 2£¨GPIO4£©
+key           = 1£¨GPIO5£©
+led           = 6£¨GPIO12 RXD£©--led==RL
+
