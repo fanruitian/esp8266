@@ -1,25 +1,18 @@
-
-
-led_wifi      = 2
-key           = 1
-led           = 6
+led_wifi      = 1
+key           = 2
+led           = 6--9
 key_led_state = 2--2: not press;1:press on;0:press off;3:http send
-
 
 i       = 0 
 j       = 0
 disconn = 0 
-click2  = 0
+
 
 gpio.mode(led_wifi, gpio.OUTPUT)
 gpio.mode(led, gpio.OUTPUT)
 gpio.mode(key, gpio.INPUT)
 
 dofile("routerset.lua")
-
-
-
-
  
 if(file.open("info.lua", "r")==nil) then
     file.close()  
@@ -30,7 +23,6 @@ if(file.open("info.lua", "r")==nil) then
     file.close()  
 end    
  
- 
 if(gpio.read(key)==0) then
     print("reset key pressed ");
     file.open("info.lua", "w+")
@@ -40,32 +32,24 @@ if(gpio.read(key)==0) then
     file.close()  
 end
 
-
-
 gpio.mode(key,gpio.INT)
     function pin1cb(level)
-        if(click2  == 0)then 
-            if(gpio.read(led)==0)then
-                print("key,led==0")
-                key_led_state = 1
-                click2        = 1
-                gpio.write(led, gpio.HIGH)
-            else
-                print("key,led==1")
-                key_led_state = 0
-                click2        = 1
-                gpio.write(led, gpio.LOW)
-            end 
-        end
+        if(gpio.read(led)==0)then
+            print("key,led==0")
+            key_led_state = 1
+            gpio.write(led, gpio.HIGH)
+        else
+            print("key,led==1")
+            key_led_state = 0
+            gpio.write(led, gpio.LOW)
+        end 
     end
 gpio.trig(key, "up",pin1cb)
 
-
-
 function to_view_state()
     tmr.alarm(1, 500, 1, function() 
-        click2 = 0
         -- print(wifi.sta.status())
+        --[[
         if (wifi.sta.getip() ~= nil) then
             print("Config done, IP is "..wifi.sta.getip())
             pwm.close(led_wifi);
@@ -78,35 +62,24 @@ function to_view_state()
             file.close()  
             tmr.stop(1)
 
-            tmr.alarm(1, 500, 1, function() 
-                click2 = 0
-                i = i+1;
-                if(i == 3)    then 
-                    i = 0;
-                    j = j+1;
-                    print(j);
+            tmr.alarm(2, 1500, 1, function() 
+                j = j+1;
+                print(j);                   
+                if(j>20) then
+                    print(j.." time disconnect,attempt restart")
+                    node.restart()
+                end                    
+                if (disconn == 0) then 
+                    toconn()
+                    print("disconn==0")
                     
-                    if(j >= 10) then
-                        print("10 time disconnect from server,system attempt to reconnect")
-                        conn:close()
-                    end
-                    if(j >= 50) then
-                        print("10 time disconnect from server,system attempt to restart")
-                        node.restart()
-                    end
-                    
-                     
-                    if (disconn == 0) then 
-                        toconn()
-                        print("disconn==0")
-                        
-                    else
-                        toget()
-                         print("disconn==1")   
-                    end
+                else
+                    toget()
+                     print("disconn==1")   
                 end
             end)
         end
+        ]]--
     end)
 end
 

@@ -39,7 +39,7 @@ function start_html_link()
                 password = string.sub(str,(m+10),n-1)
                 print(strpass)
                 
-                str    = "module attempt to connect router..."
+                str    = "attempt to connect router,AP will close..."
                 length = string.len(title)+string.len(str)
                 print(length)
                 conn:send("HTTP/1.1 200 OK\r\n"
@@ -77,91 +77,53 @@ function listap(t)
     .."<table>"
     .."<tr>"
     .."<td>SSID:</td>"
-    .."<td><input name='ssid' type='text' id='ssid' /></td>"
+    .."<td><input name='ssid' type='text' id='s' /></td>"
     .."</tr>"
     .."<tr>"
     .."<td>PASSWORD:</td>"
-    .."<td><input name='password' type='password' id='password' /></td>"
+    .."<td><input name='password' type='password' id='p' /></td>"
     .."</tr>"
     .."<tr>"
-    .."<td><input name='OK' type='submit' value='OK' onclick='return check_form()'/></td>"
+    .."<td><input type='submit' value='OK' onclick='return check()'/></td>"
     .."</tr>"
     .."</table>"
     .."</form>\r\n"
     
     
     js = "<script language='javascript'>\r"
-    .."function f(node)\r"
-    .."{\r"
-    .."var tr1 = node.parentNode.parentNode;\r"
-    .."document.getElementById('ssid').value=tr1.cells[0].innerText;\r"
-    .."document.getElementById('password').focus();\r"        
+    .."function f(n)\r"
+    .."{"
+    .."var t = n.parentNode.parentNode;"
+    .."s.value=t.cells[0].innerText;"
+    .."p.focus();"        
     .."}\r"
-    .."function check_form()\r"
-    .."{\r"
-    .."if(document.getElementById('ssid').value=='')\r"
-    .."{\r"
-    .."   alert('please select or input a ssid!')\r"
-    .."   return false;\r"
+    .."function check()"
+    .."{"
+    .."if(s.value=='')"
+    .."{"
+    .."   alert('please select or input a ssid!');"
+    .."   return false;"
+    .."}"
+    .."return true;"    
     .."}\r"
-    .."if(document.getElementById('password').value=='')\r"
-    .."{\r"
-    .."   if(confirm('empty password?') == false)\r"
-    .."       return false;\r"
-    .."   else\r"
-    .."     return true;\r"
-    .."}\r"
-    .."return true;\r"    
-    .."}\r"
-    .."</script>\r"
+    .."</script>"
+    
     
   aplist = "<h2>Please Select a SSID</h2>"
          .."<table width='100%' border='1' cellspacing='0' cellpadding='0' style='text-align:center'>"   
     
     
   for k,v in pairs(t) do      
-      -- m    = string.find(v,",")
-      --mode = string.sub(v,0,m-1)
-      --if(mode == "0")then
-      --mode = "OPEN"
-      --elseif(mode =="1")then
-      --mode = "WEP"
-      --elseif(mode =="2")then
-      --mode = "WPA_PSK"
-      --elseif(mode =="3")then
-      --mode = "WPA2_PSK"
-      --elseif(mode=="4")then
-      --mode = "WPA_WPA2_PSK"
-      --end     
-      --v    = string.sub(v,m+1)
-      --m    = string.find(v,",")
-      --rssi = string.sub(v,1,m-1)
-      --if(rssi >= "-30" and rssi <"-41") then
-      --rssi = "100%"
-      --elseif(rssi >= "-41" and rssi <"-52")then
-      --rssi = "90%"
-      --elseif(rssi >= "-52" and rssi <"-63")then
-      --rssi = "80%"
-      --elseif(rssi >= "-63" and rssi <"-75")then
-      --rssi = "60%"
-      --elseif(rssi >= "-75" and rssi <"-89")then
-      --rssi = "40%"
-      --elseif(rssi >= "-89")then
-      --rssi = "10%"
-      --end
-  aplist = aplist.." <tr>"
+  aplist = aplist.."<tr>"
           .."<td>"..k.."</td>"
-          -- .."<td>"..mode.."</td>"
-          --.."<td>"..rssi.."</td>"
           .."<td><input type='button' value='select' onClick='f(this)'/></td>"
           .."</tr>"
-  --         print(k.." : "..mode..","..rssi)
   end
     aplist = aplist.."</table>\r\n"
   
   
   
-  length = string.len(title)+string.len(aplist)+string.len(form)+string.len(js)
+    length = string.len(title)+string.len(aplist)+string.len(form)+string.len(js)
   print(length)
     conn:send("HTTP/1.1 200 OK\r\n"
     .."Content-Length: "..length.."\r\n"

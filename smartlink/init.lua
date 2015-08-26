@@ -1,7 +1,7 @@
 
-led_wifi      = 2
-key           = 1
-led           = 6
+led_wifi      = 1
+key           = 2
+led           = 9
 key_led_state = 2--2: not press;1:press on;0:press off;3:http send
 
 
@@ -45,7 +45,7 @@ function pin1cb(level)
         gpio.write(led, gpio.LOW)
     end
 end
-gpio.trig(key, "down",pin1cb)
+gpio.trig(key, "up",pin1cb)
 
 print("Starting...")
 wifi.setmode(wifi.STATION)
