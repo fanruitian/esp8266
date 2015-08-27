@@ -39,7 +39,8 @@ function start_html_link()
                 password = string.sub(str,(m+10),n-1)
                 print(strpass)
                 
-                str    = "attempt to connect router,AP will close..."
+                --[[
+                str    = "module attempt to connect router..."
                 length = string.len(title)+string.len(str)
                 print(length)
                 conn:send("HTTP/1.1 200 OK\r\n"
@@ -49,9 +50,12 @@ function start_html_link()
                 conn:send(title)
                 conn:send(str)
                 conn:close()
+                ]]--
                 
-                pwm.setup(led_wifi, 2, 512);
-                pwm.start(led_wifi); 
+                pwm.setup(led_wifi, 2, 512)
+                pwm.start(led_wifi)
+                
+                
                 wifi.sta.config(ssid,password)  
                 wifi.setmode(wifi.STATION)
                 
@@ -77,60 +81,58 @@ function listap(t)
     .."<table>"
     .."<tr>"
     .."<td>SSID:</td>"
-    .."<td><input name='ssid' type='text' id='s' /></td>"
+    .."<td><input name='ssid' type='text' id='ssid' /></td>"
     .."</tr>"
     .."<tr>"
     .."<td>PASSWORD:</td>"
-    .."<td><input name='password' type='password' id='p' /></td>"
+    .."<td><input name='password' type='password' id='password' /></td>"
     .."</tr>"
     .."<tr>"
-    .."<td><input type='submit' value='OK' onclick='return check()'/></td>"
+    .."<td><input name='OK' type='submit' value='OK' onclick='return check_form()'/></td>"
     .."</tr>"
     .."</table>"
     .."</form>\r\n"
     
     
     js = "<script language='javascript'>\r"
-    .."function f(n)\r"
-    .."{"
-    .."var t = n.parentNode.parentNode;"
-    .."s.value=t.cells[0].innerText;"
-    .."p.focus();"        
+    .."function f(node)\r"
+    .."{\r"
+    .."var tr1 = node.parentNode.parentNode;\r"
+    .."document.getElementById('ssid').value=tr1.cells[0].innerText;\r"
+    .."document.getElementById('password').focus();\r"        
     .."}\r"
-    .."function check()"
-    .."{"
-    .."if(s.value=='')"
-    .."{"
-    .."   alert('please select or input a ssid!');"
-    .."   return false;"
-    .."}"
-    .."return true;"    
+    .."function check_form()\r"
+    .."{\r"
+    .."if(document.getElementById('ssid').value=='')\r"
+    .."{\r"
+    .."   alert('please select or input a ssid!')\r"
+    .."   return false;\r"
     .."}\r"
-    .."</script>"
-    
+    .."if(document.getElementById('password').value=='')\r"
+    .."{\r"
+    .."   if(confirm('empty password?') == false)\r"
+    .."       return false;\r"
+    .."   else\r"
+    .."     return true;\r"
+    .."}\r"
+    .."return true;\r"    
+    .."}\r"
+    .."</script>\r"
     
   aplist = "<h2>Please Select a SSID</h2>"
          .."<table width='100%' border='1' cellspacing='0' cellpadding='0' style='text-align:center'>"   
-    
-    
-  for k,v in pairs(t) do      
-  aplist = aplist.."<tr>"
-          .."<td>"..k.."</td>"
-          .."<td><input type='button' value='select' onClick='f(this)'/></td>"
-          .."</tr>"
-  end
-    aplist = aplist.."</table>\r\n"
+  aplist = aplist.."</table>\r\n"
   
   
   
-    length = string.len(title)+string.len(aplist)+string.len(form)+string.len(js)
+    length = string.len(title)+string.len(form)+string.len(js)--+string.len(aplist)
   print(length)
     conn:send("HTTP/1.1 200 OK\r\n"
     .."Content-Length: "..length.."\r\n"
     .."Content-Type: text/html\r\n\r\n"
     )
     conn:send(title)
-    conn:send(aplist)
+    --conn:send(aplist)
     conn:send(form)
     conn:send(js)
      

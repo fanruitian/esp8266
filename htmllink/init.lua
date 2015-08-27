@@ -1,6 +1,6 @@
 led_wifi      = 1
 key           = 2
-led           = 6--9
+led           = 9--9
 key_led_state = 2--2: not press;1:press on;0:press off;3:http send
 
 i       = 0 
@@ -49,7 +49,7 @@ gpio.trig(key, "up",pin1cb)
 function to_view_state()
     tmr.alarm(1, 500, 1, function() 
         -- print(wifi.sta.status())
-        --[[
+        
         if (wifi.sta.getip() ~= nil) then
             print("Config done, IP is "..wifi.sta.getip())
             pwm.close(led_wifi);
@@ -79,7 +79,7 @@ function to_view_state()
                 end
             end)
         end
-        ]]--
+        
     end)
 end
 
